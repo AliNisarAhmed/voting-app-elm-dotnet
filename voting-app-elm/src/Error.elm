@@ -1,0 +1,22 @@
+module Error exposing (..)
+
+import Http
+
+
+buildErrorMessage : Http.Error -> String
+buildErrorMessage httpError =
+    case httpError of
+        Http.BadUrl m ->
+            m
+
+        Http.Timeout ->
+            "Timeout"
+
+        Http.NetworkError ->
+            "Network Unavailable"
+
+        Http.BadStatus statusCode ->
+            "Request failed with code: " ++ String.fromInt statusCode
+
+        Http.BadBody m ->
+            m
