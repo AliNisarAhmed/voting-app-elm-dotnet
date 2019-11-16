@@ -46,12 +46,14 @@ namespace VotingAPI.ServiceInterface
             }
         }
 
-        public async Task<List<Poll>> Get(GetAllPollsRequest req)
+        public async Task<object> Get(GetAllPollsRequest req)
         {
             // TODO: This returns the PollOptions List populated, but CLient is not!!
-            var q = Db.From<Poll>();
-            var polls = await Db.LoadSelectAsync<Poll>(q);
-            return polls;
+            var result = await Db.SqlListAsync<object>(
+                @"select poll.id, poll.clientId, poll.Description, count(v.id) as votes from poll
+                    left join vote v on v.PollId = poll.id
+                    group by poll.id, poll.clientId, poll.Description");
+            return result;
         }
 
         public async Task<object> Get(GetSinglePollDetails req)

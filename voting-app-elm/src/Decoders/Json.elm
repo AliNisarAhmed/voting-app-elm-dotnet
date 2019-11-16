@@ -19,6 +19,14 @@ type alias Poll =
     }
 
 
+type alias PollWithVoteCount =
+    { id : Int
+    , description : String
+    , clientId : Int
+    , votes : Int
+    }
+
+
 optionDecoder : Decode.Decoder Option
 optionDecoder =
     Decode.succeed Option
@@ -44,3 +52,17 @@ pollDecoder =
 pollsDecoder : Decode.Decoder (List Poll)
 pollsDecoder =
     Decode.list pollDecoder
+
+
+pollWithVoteCountDecoder : Decode.Decoder PollWithVoteCount
+pollWithVoteCountDecoder =
+    Decode.succeed PollWithVoteCount
+        |> required "id" Decode.int
+        |> required "Description" Decode.string
+        |> required "clientId" Decode.int
+        |> required "votes" Decode.int
+
+
+pollsWithVoteCountDecoder : Decode.Decoder (List PollWithVoteCount)
+pollsWithVoteCountDecoder =
+    Decode.list pollWithVoteCountDecoder

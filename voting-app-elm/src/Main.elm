@@ -1,138 +1,69 @@
 module Main exposing (..)
 
 import Browser exposing (..)
-import Decoders.Json exposing (..)
-import Element as E exposing (Element)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Input as Input
-import Error exposing (buildErrorMessage)
-import Html exposing (Html)
-import Http
-import RemoteData as RD exposing (WebData)
+import Browser.Navigation as Nav
+import Html exposing (..)
+import Page.ListPolls as ListPolls
+import Route exposing (Route)
 import Url exposing (Url)
 
 
 
 ---- TYPES ----
+
+
+type Page
+    = NotFoundPage
+    | ListPollsPage ListPolls.Model
+
+
+type Msg
+    = ListPollsPageMsg ListPolls.Msg
+    | LinkClicked UrlRequest
+    | UrlChanged Url
+
+
+
 ---- MODEL ----
 
 
 type alias Model =
-    { posts : WebData (List Poll)
-    , errorMessage : Maybe String
+    { route : Route
+    , page : Page
+    , navKey : Nav.Key
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( { posts = RD.Loading, errorMessage = Nothing }, fetchPolls )
+init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url navKey =
+    let
+        model =
+            { route = Route.parseUrl url
+            , page = NotFoundPage
+            , navKey = navKey
+            }
+    in
+    initCurrentPage ( model, Cmd.none )
 
 
+initCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+initCurrentPage ( model, existingCmds ) =
+    let
+        ( currentPage, mappedPageCmds ) =
+            case model.route of
+                Route.LandingPage ->
+                    let
+                        ( pageModel, pageCmds ) =
+                            ListPolls.init model.navKey
+                    in
+                    ( ListPollsPage pageModel, Cmd.map ListPollsPageMsg pageCmds )
 
----- COMMANDS ----
-
-
-fetchPolls : Cmd Msg
-fetchPolls =
-    Http.get
-        { url = "http://localhost:56678/api/polls"
-        , expect = Http.expectJson (RD.fromResult >> DataReceived) pollsDecoder
-        }
-
-
-
----- UPDATE ----
-
-
-type Msg
-    = NoOp
-    | DataReceived (WebData (List Poll))
-    | UrlChange Url
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        DataReceived res ->
-            ( { model | posts = res }, Cmd.none )
-
-        UrlChange _ ->
-            ( model, Cmd.none )
-
-        NoOp ->
-            ( model, Cmd.none )
-
-
-
----- VIEW ----
--- view : Model -> Document Msg
-
-
-view : Model -> Html Msg
-view model =
-    currentView model
-
-
-
--- { title = "Voting App"
--- , body = [ currentView model ]
--- }
-
-
-currentView : Model -> Html Msg
-currentView model =
-    E.layout [] <|
-        E.column []
-            [ E.row []
-                [ E.text "Voting App" ]
-            , E.row [] [ E.text "Built with Elm & .Net Core" ]
-            , viewPollsOrError model
-            ]
-
-
-viewPollsOrError : Model -> Element Msg
-viewPollsOrError model =
-    case model.posts of
-        RD.NotAsked ->
-            E.text ""
-
-        RD.Loading ->
-            E.text "Loading..."
-
-        RD.Failure httpError ->
-            viewError (buildErrorMessage httpError)
-
-        RD.Success polls ->
-            viewPolls polls
-
-
-viewError : String -> Element Msg
-viewError err =
-    E.row [] [ E.text err ]
-
-
-viewPolls : List Poll -> Element Msg
-viewPolls polls =
-    E.column []
-        [ E.row [] <|
-            List.map
-                viewPoll
-                polls
-        ]
-
-
-viewPoll : Poll -> Element Msg
-viewPoll poll =
-    E.row [] <|
-        [ E.row [] [ E.text poll.description ]
-        ]
-            ++ List.map viewOption poll.options
-
-
-viewOption : Option -> Element Msg
-viewOption option =
-    E.row [] [ E.text option.optionText ]
+                _ ->
+                    ( NotFoundPage, Cmd.none )
+    in
+    ( { model | page = currentPage }
+    , Cmd.batch [ existingCmds, mappedPageCmds ]
+    )
 
 
 
@@ -141,22 +72,80 @@ viewOption option =
 
 main : Program () Model Msg
 main =
-    Browser.element
+    Browser.application
         { init = init
         , view = view
         , update = update
         , subscriptions = \_ -> Sub.none
+        , onUrlRequest = LinkClicked
+        , onUrlChange = UrlChanged
         }
 
 
 
--- main : Program Flags Model Msg
--- main =
---     Browser.application
---         { init = init
---         , view = view
---         , update = update
---         , subscriptions = always Sub.none
---         , onUrlRequest = NoOp
---         , onUrlChange = UrlChange
---         }
+---- UPDATE ----
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case ( msg, model.page ) of
+        ( ListPollsPageMsg pageMsg, ListPollsPage pageModel ) ->
+            let
+                ( updatedPageModel, updatedCmd ) =
+                    ListPolls.update pageMsg pageModel
+            in
+            ( { model | page = ListPollsPage updatedPageModel }
+            , Cmd.map ListPollsPageMsg updatedCmd
+            )
+
+        ( LinkClicked urlRequest, _ ) ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model
+                    , Nav.pushUrl model.navKey (Url.toString url)
+                    )
+
+                Browser.External url ->
+                    ( model
+                    , Nav.load url
+                    )
+
+        ( UrlChanged url, _ ) ->
+            let
+                newRoute =
+                    Route.parseUrl url
+            in
+            ( { model | route = newRoute }
+            , Cmd.none
+            )
+                |> initCurrentPage
+
+        ( _, _ ) ->
+            ( model, Cmd.none )
+
+
+
+---- VIEW ----
+
+
+view : Model -> Document Msg
+view model =
+    { title = "Vote App"
+    , body = [ currentView model ]
+    }
+
+
+currentView : Model -> Html Msg
+currentView model =
+    case model.page of
+        ListPollsPage pageModel ->
+            ListPolls.view pageModel
+                |> Html.map ListPollsPageMsg
+
+        _ ->
+            notFoundView
+
+
+notFoundView : Html Msg
+notFoundView =
+    h3 [] [ text "Oops! The page you requested was not found!" ]
