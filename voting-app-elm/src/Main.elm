@@ -54,7 +54,7 @@ initCurrentPage ( model, existingCmds ) =
                 Route.LandingPage ->
                     let
                         ( pageModel, pageCmds ) =
-                            ListPolls.init model.navKey
+                            ListPolls.init
                     in
                     ( ListPollsPage pageModel, Cmd.map ListPollsPageMsg pageCmds )
 
