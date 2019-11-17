@@ -23,7 +23,7 @@ type Msg
     = NoOp
     | DataReceived (WebData (List PollWithVoteCount))
     | SearchPolls String
-    | OnPollClick Int Nav.Key
+    | OnPollClick Int
 
 
 
@@ -34,16 +34,14 @@ type alias Model =
     { polls : WebData (List PollWithVoteCount)
     , errorMessage : Maybe String
     , searchTerm : String
-    , navKey : Nav.Key
     }
 
 
-init : Nav.Key -> ( Model, Cmd Msg )
-init navKey =
+init : ( Model, Cmd Msg )
+init =
     ( { polls = RD.Loading
       , errorMessage = Nothing
       , searchTerm = ""
-      , navKey = navKey
       }
     , fetchPolls
     )
@@ -61,12 +59,10 @@ fetchPolls =
         }
 
 
-changeRoute : Int -> Nav.Key -> Cmd Msg
-changeRoute pollId navKey =
-    Nav.pushUrl navKey ("/poll/" ++ String.fromInt pollId)
 
-
-
+-- changeRoute : Int -> Nav.Key -> Cmd Msg
+-- changeRoute pollId navKey =
+--     Nav.pushUrl navKey ("/poll/" ++ String.fromInt pollId)
 ---- UPDATE ----
 
 
@@ -79,8 +75,8 @@ update msg model =
         SearchPolls searchTerm ->
             ( { model | searchTerm = searchTerm }, Cmd.none )
 
-        OnPollClick pollId navKey ->
-            ( model, changeRoute pollId navKey )
+        OnPollClick pollId ->
+            ( model, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -136,7 +132,7 @@ viewPollsOrError model =
             viewError (buildErrorMessage httpError)
 
         RD.Success pollList ->
-            viewPolls model.navKey <|
+            viewPolls <|
                 List.filter
                     (\p ->
                         String.contains
@@ -151,30 +147,34 @@ viewError err =
     E.row [] [ E.text err ]
 
 
-viewPolls : Nav.Key -> List PollWithVoteCount -> Element Msg
-viewPolls navKey polls =
+viewPolls : List PollWithVoteCount -> Element Msg
+viewPolls polls =
     E.column [ E.width (E.px 1200), E.height E.fill, E.height E.fill, E.centerX ] <|
         [ E.wrappedRow [] <|
-            List.map (viewPoll navKey) polls
+            List.map viewPoll polls
         ]
 
 
-viewPoll : Nav.Key -> PollWithVoteCount -> Element Msg
-viewPoll navKey poll =
-    E.row
-        [ E.paddingXY 0 30
-        , Border.color <| E.rgb255 0 0 0
-        , Border.solid
-        , Border.width 1
-        , Border.rounded 10
-        , Events.onClick <| OnPollClick poll.id navKey
-        ]
-    <|
-        [ E.column [ E.paddingXY 50 50 ]
-            [ E.row [] [ E.text poll.description ]
-            , E.row [] [ viewVoteCount poll.votes ]
-            ]
-        ]
+viewPoll : PollWithVoteCount -> Element Msg
+viewPoll poll =
+    E.link []
+        { url = "/posts/" ++ String.fromInt poll.id
+        , label =
+            E.row
+                [ E.paddingXY 0 30
+                , Border.color <| E.rgb255 0 0 0
+                , Border.solid
+                , Border.width 1
+                , Border.rounded 10
+                , Events.onClick <| OnPollClick poll.id
+                ]
+            <|
+                [ E.column [ E.paddingXY 50 50 ]
+                    [ E.row [] [ E.text poll.description ]
+                    , E.row [] [ viewVoteCount poll.votes ]
+                    ]
+                ]
+        }
 
 
 viewVoteCount : Int -> Element Msg
