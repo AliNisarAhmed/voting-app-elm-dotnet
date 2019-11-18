@@ -60,9 +60,6 @@ fetchPolls =
 
 
 
--- changeRoute : Int -> Nav.Key -> Cmd Msg
--- changeRoute pollId navKey =
---     Nav.pushUrl navKey ("/poll/" ++ String.fromInt pollId)
 ---- UPDATE ----
 
 
@@ -104,6 +101,17 @@ navbar : Model -> Element Msg
 navbar model =
     E.row [ E.width E.fill, E.alignTop ]
         [ E.el [ E.alignLeft ] <| E.text "YOU VOTE!"
+        , E.link
+            [ E.alignRight
+            , E.paddingEach { top = 0, right = 20, bottom = 0, left = 0 }
+            , Border.width 1
+            , Border.rounded 10
+            , Border.color <| E.rgb255 23 230 23
+            , E.padding 20
+            ]
+            { url = "/poll/new"
+            , label = E.text "Create New Poll"
+            }
         , E.el [ E.alignRight, E.width (E.px 300) ] <| searchBar model.searchTerm
         ]
 

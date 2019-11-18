@@ -25,7 +25,7 @@ namespace VotingAPI
             //this.Plugins.Add(new PostmanFeature());
             //this.Plugins.Add(new CorsFeature());
 
-            Plugins.Add(new CorsFeature());
+            this.Plugins.Add(new CorsFeature());
 
             container.Register<IDbConnectionFactory>(c => new OrmLiteConnectionFactory(
                 "Data Source=.; Initial Catalog=VotingApp; Integrated Security=True", SqlServerDialect.Provider

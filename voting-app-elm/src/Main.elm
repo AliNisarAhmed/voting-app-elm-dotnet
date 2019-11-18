@@ -4,6 +4,7 @@ import Browser exposing (..)
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Page.ListPolls as ListPolls
+import Page.NewPoll as NewPoll
 import Route exposing (Route)
 import Url exposing (Url)
 
@@ -15,10 +16,12 @@ import Url exposing (Url)
 type Page
     = NotFoundPage
     | ListPollsPage ListPolls.Model
+    | NewPollPage NewPoll.Model
 
 
 type Msg
     = ListPollsPageMsg ListPolls.Msg
+    | NewPollPageMsg NewPoll.Msg
     | LinkClicked UrlRequest
     | UrlChanged Url
 
@@ -58,6 +61,13 @@ initCurrentPage ( model, existingCmds ) =
                     in
                     ( ListPollsPage pageModel, Cmd.map ListPollsPageMsg pageCmds )
 
+                Route.NewPollPage ->
+                    let
+                        ( pageModel, pageCmds ) =
+                            NewPoll.init model.navKey
+                    in
+                    ( NewPollPage pageModel, Cmd.map NewPollPageMsg pageCmds )
+
                 _ ->
                     ( NotFoundPage, Cmd.none )
     in
@@ -96,6 +106,15 @@ update msg model =
             in
             ( { model | page = ListPollsPage updatedPageModel }
             , Cmd.map ListPollsPageMsg updatedCmd
+            )
+
+        ( NewPollPageMsg pageMsg, NewPollPage pageModel ) ->
+            let
+                ( updatedPageModel, updatedCmds ) =
+                    NewPoll.update pageMsg pageModel
+            in
+            ( { model | page = NewPollPage updatedPageModel }
+            , Cmd.map NewPollPageMsg updatedCmds
             )
 
         ( LinkClicked urlRequest, _ ) ->
@@ -141,6 +160,9 @@ currentView model =
         ListPollsPage pageModel ->
             ListPolls.view pageModel
                 |> Html.map ListPollsPageMsg
+
+        NewPollPage pageModel ->
+            Html.map NewPollPageMsg <| NewPoll.view pageModel
 
         _ ->
             notFoundView

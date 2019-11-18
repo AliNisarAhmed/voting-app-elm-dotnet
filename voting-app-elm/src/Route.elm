@@ -8,6 +8,7 @@ import Url.Parser exposing (..)
 type Route
     = NotFound
     | LandingPage
+    | NewPollPage
     | Poll Int
 
 
@@ -32,17 +33,21 @@ matchRoute =
     oneOf
         [ map LandingPage top
         , map Poll (s "poll" </> int)
+        , map NewPollPage (s "poll" </> s "new")
         ]
 
 
 routeToString : Route -> String
 routeToString route =
     case route of
-        NotFound ->
-            "/not-found"
-
         LandingPage ->
             "/"
 
         Poll id ->
             "/poll/" ++ String.fromInt id
+
+        NewPollPage ->
+            "/poll/new"
+
+        NotFound ->
+            "/not-found"
