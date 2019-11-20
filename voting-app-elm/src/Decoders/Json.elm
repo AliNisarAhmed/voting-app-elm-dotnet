@@ -27,6 +27,59 @@ type alias PollWithVoteCount =
     }
 
 
+type alias Client =
+    { id : Int
+    , firstName : String
+    , lastName : String
+    , email : String
+    }
+
+
+type alias OptionWithVote =
+    { votes : Int
+    , id : Int
+    , pollId : Int
+    , optionText : String
+    }
+
+
+type alias PollDetails =
+    { options : List OptionWithVote
+    , creator : Client
+    , id : Int
+    , description : String
+    , clientId : Int
+    }
+
+
+pollDetailsDecoder : Decode.Decoder PollDetails
+pollDetailsDecoder =
+    Decode.succeed PollDetails
+        |> custom (Decode.list optionWithVoteDecoder)
+        |> custom clientDecoder
+        |> required "Id" Decode.int
+        |> required "Description" Decode.string
+        |> required "ClientId" Decode.int
+
+
+optionWithVoteDecoder : Decode.Decoder OptionWithVote
+optionWithVoteDecoder =
+    Decode.succeed OptionWithVote
+        |> required "Votes" Decode.int
+        |> required "Id" Decode.int
+        |> optional "PollId" Decode.int -1
+        |> required "OptionText" Decode.string
+
+
+clientDecoder : Decode.Decoder Client
+clientDecoder =
+    Decode.succeed Client
+        |> optional "Id" Decode.int -1
+        |> required "FirstName" Decode.string
+        |> required "LastName" Decode.string
+        |> required "Email" Decode.string
+
+
 optionDecoder : Decode.Decoder Option
 optionDecoder =
     Decode.succeed Option

@@ -48,11 +48,12 @@ namespace VotingAPI.ServiceInterface
 
         public async Task<object> Get(GetAllPollsRequest req)
         {
-            // TODO: This returns the PollOptions List populated, but CLient is not!!
-            var result = await Db.SqlListAsync<object>(
-                @"select poll.id, poll.clientId, poll.Description, count(v.id) as votes from poll
+        //TODO: This returns the PollOptions List populated, but CLient is not!!
+       var result = await Db.SqlListAsync<object>(
+           @"select poll.id, poll.clientId, poll.Description, count(v.id) as votes from poll
                     left join vote v on v.PollId = poll.id
                     group by poll.id, poll.clientId, poll.Description");
+
             return result;
         }
 
@@ -72,12 +73,15 @@ namespace VotingAPI.ServiceInterface
                 };
                 optionsWithVoteCount.Add(optionWithCount);
             }
-            var pollWithOptions = new PollWithOptionsAndVotes()
+
+            var creator = await Db.SingleByIdAsync<Client>(poll.ClientId);
+            var pollWithOptions = new PollDetailsDTO()
             {
                 Id = poll.Id,
                 ClientId = poll.ClientId,
-                OptionsWithCounts = optionsWithVoteCount,
-                Description = poll.Description
+                Options = optionsWithVoteCount,
+                Description = poll.Description,
+                Creator = creator
             };
             return pollWithOptions;
         }

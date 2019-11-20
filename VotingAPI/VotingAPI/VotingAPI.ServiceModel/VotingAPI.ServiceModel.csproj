@@ -49,7 +49,7 @@
     <Compile Include="DataModels\Vote.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResponseDTOs\OptionWithVoteCount.cs" />
-    <Compile Include="ResponseDTOs\PollWithOptionsAndVotes.cs" />
+    <Compile Include="ResponseDTOs\PollDetailsDTO.cs" />
     <Compile Include="ServiceModels\ClientServiceModel.cs" />
     <Compile Include="ServiceModels\PollServiceModel.cs" />
     <Compile Include="ServiceModels\UserServiceModel.cs" />

@@ -1,5 +1,6 @@
 module Error exposing (..)
 
+import Element exposing (Element, row, text)
 import Http
 
 
@@ -20,3 +21,8 @@ buildErrorMessage httpError =
 
         Http.BadBody m ->
             m
+
+
+viewError : String -> Element msg
+viewError err =
+    row [] [ text err ]

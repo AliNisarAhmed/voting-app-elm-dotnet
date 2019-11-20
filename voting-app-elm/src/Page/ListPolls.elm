@@ -8,7 +8,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Events as Events
 import Element.Input as Input
-import Error exposing (buildErrorMessage)
+import Error exposing (buildErrorMessage, viewError)
 import Html exposing (Html)
 import Http
 import RemoteData as RD exposing (WebData)
@@ -23,7 +23,6 @@ type Msg
     = NoOp
     | DataReceived (WebData (List PollWithVoteCount))
     | SearchPolls String
-    | OnPollClick Int
 
 
 
@@ -71,9 +70,6 @@ update msg model =
 
         SearchPolls searchTerm ->
             ( { model | searchTerm = searchTerm }, Cmd.none )
-
-        OnPollClick pollId ->
-            ( model, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -150,11 +146,6 @@ viewPollsOrError model =
                     pollList
 
 
-viewError : String -> Element Msg
-viewError err =
-    E.row [] [ E.text err ]
-
-
 viewPolls : List PollWithVoteCount -> Element Msg
 viewPolls polls =
     E.column [ E.width (E.px 1200), E.height E.fill, E.height E.fill, E.centerX ] <|
@@ -166,7 +157,7 @@ viewPolls polls =
 viewPoll : PollWithVoteCount -> Element Msg
 viewPoll poll =
     E.link []
-        { url = "/posts/" ++ String.fromInt poll.id
+        { url = "/poll/" ++ String.fromInt poll.id
         , label =
             E.row
                 [ E.paddingXY 0 30
@@ -174,7 +165,6 @@ viewPoll poll =
                 , Border.solid
                 , Border.width 1
                 , Border.rounded 10
-                , Events.onClick <| OnPollClick poll.id
                 ]
             <|
                 [ E.column [ E.paddingXY 50 50 ]

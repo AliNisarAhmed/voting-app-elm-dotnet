@@ -9,7 +9,7 @@ type Route
     = NotFound
     | LandingPage
     | NewPollPage
-    | Poll Int
+    | PollDetails Int
 
 
 pushUrl : Route -> Nav.Key -> Cmd msg
@@ -32,7 +32,7 @@ matchRoute : Parser (Route -> a) a
 matchRoute =
     oneOf
         [ map LandingPage top
-        , map Poll (s "poll" </> int)
+        , map PollDetails (s "poll" </> int)
         , map NewPollPage (s "poll" </> s "new")
         ]
 
@@ -43,7 +43,7 @@ routeToString route =
         LandingPage ->
             "/"
 
-        Poll id ->
+        PollDetails id ->
             "/poll/" ++ String.fromInt id
 
         NewPollPage ->
