@@ -55,8 +55,8 @@ type alias PollDetails =
 pollDetailsDecoder : Decode.Decoder PollDetails
 pollDetailsDecoder =
     Decode.succeed PollDetails
-        |> custom (Decode.list optionWithVoteDecoder)
-        |> custom clientDecoder
+        |> required "Options" (Decode.list optionWithVoteDecoder)
+        |> required "Creator" clientDecoder
         |> required "Id" Decode.int
         |> required "Description" Decode.string
         |> required "ClientId" Decode.int
@@ -74,7 +74,7 @@ optionWithVoteDecoder =
 clientDecoder : Decode.Decoder Client
 clientDecoder =
     Decode.succeed Client
-        |> optional "Id" Decode.int -1
+        |> required "Id" Decode.int
         |> required "FirstName" Decode.string
         |> required "LastName" Decode.string
         |> required "Email" Decode.string

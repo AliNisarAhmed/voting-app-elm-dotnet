@@ -26,6 +26,7 @@ import Url exposing (Url)
 
 type Msg
     = PollDetailsReceived (WebData PollDetails)
+    | ToggleCanVote
     | NoOp
 
 
@@ -34,12 +35,16 @@ type Msg
 
 
 type alias Model =
-    { pollDetails : WebData PollDetails }
+    { pollDetails : WebData PollDetails
+    , canVote : Bool
+    }
 
 
 init : Int -> ( Model, Cmd Msg )
 init pollId =
-    ( { pollDetails = RD.NotAsked }
+    ( { pollDetails = RD.NotAsked
+      , canVote = False
+      }
     , getPollDetails pollId
     )
 
@@ -65,6 +70,11 @@ update msg model =
     case msg of
         PollDetailsReceived res ->
             ( { model | pollDetails = res }, Cmd.none )
+
+        ToggleCanVote ->
+            ( { model | canVote = not model.canVote }
+            , Cmd.none
+            )
 
         NoOp ->
             ( model, Cmd.none )
@@ -95,12 +105,55 @@ view model =
         E.column []
             [ E.row [] [ E.text "Poll Details Page" ]
             , content
+            , voteButton model.canVote
+            , cancelButton model.canVote
             ]
+
+
+voteButton : Bool -> Element Msg
+voteButton canVote =
+    if canVote then
+        Input.button []
+            { onPress = Just ToggleCanVote
+            , label = E.text "Submit Vote"
+            }
+
+    else
+        Input.button []
+            { onPress = Just ToggleCanVote
+            , label = E.text "Click To Vote"
+            }
+
+
+cancelButton : Bool -> Element Msg
+cancelButton canVote =
+    if canVote then
+        Input.button []
+            { onPress = Just ToggleCanVote
+            , label = E.text "Cancel"
+            }
+
+    else
+        E.text ""
 
 
 viewPollDetails : PollDetails -> Element Msg
 viewPollDetails pollDetails =
     E.column []
-        [ E.row [] <| [ E.text <| "Name: " ++ pollDetails.description ]
-        , E.row [] <| [ E.text <| "Created by: " ++ pollDetails.creator.firstName ++ " " ++ pollDetails.creator.lastName ]
+        [ E.row [] [ E.text <| "Name: " ++ pollDetails.description ]
+        , E.row [] [ E.text <| "Created by: " ++ pollDetails.creator.firstName ++ " " ++ pollDetails.creator.lastName ]
+        , E.column []
+            [ E.column [] <| List.map viewOption pollDetails.options
+            , E.column [] [ E.text "Radio Button" ]
+            ]
+        ]
+
+
+viewOption : OptionWithVote -> Element Msg
+viewOption opv =
+    E.column []
+        [ E.row []
+            [ E.el [] <| E.text opv.optionText
+            , E.el [] <| E.text <| " - Votes: " ++ String.fromInt opv.votes
+            ]
         ]
