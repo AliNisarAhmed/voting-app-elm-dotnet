@@ -23,6 +23,11 @@ buildErrorMessage httpError =
             m
 
 
-viewError : String -> Element msg
+viewError : Maybe String -> Element msg
 viewError err =
-    row [] [ text err ]
+    case err of
+        Nothing ->
+            row [] []
+
+        Just e ->
+            row [] [ text e ]

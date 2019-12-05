@@ -2,6 +2,14 @@ module Decoders.Json exposing (..)
 
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
+import Json.Encode as Encode
+
+
+type alias Vote =
+    { pollId : Int
+    , clientId : Int
+    , optionId : Int
+    }
 
 
 type alias Option =
@@ -50,6 +58,15 @@ type alias PollDetails =
     , description : String
     , clientId : Int
     }
+
+
+encodeVote : Vote -> Encode.Value
+encodeVote v =
+    Encode.object
+        [ ( "pollId", Encode.int v.pollId )
+        , ( "clientId", Encode.int v.clientId )
+        , ( "optionId", Encode.int v.optionId )
+        ]
 
 
 pollDetailsDecoder : Decode.Decoder PollDetails

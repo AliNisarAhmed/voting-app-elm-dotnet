@@ -27,14 +27,8 @@ namespace VotingAPI.ServiceInterface
 
                 if (existingVote != null)
                 {
-                    // If the client has already voted, we need to either remove the previous vote, or if it is for the same option just return true
-                    if (existingVote.OptionId != req.OptionId)
-                    {
-                        existingVote.OptionId = req.OptionId;
-                        // Update the old vote with new option?
-                        await Db.SaveAsync(existingVote);
-                    }
-                    return true;
+                    // Reject If the client has already voted
+                    throw new System.Exception("You have already voted");
                 }
                 else
                 {

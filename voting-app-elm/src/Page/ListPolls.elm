@@ -133,7 +133,7 @@ viewPollsOrError model =
             E.text "Loading..."
 
         RD.Failure httpError ->
-            viewError (buildErrorMessage httpError)
+            viewError (Just <| buildErrorMessage httpError)
 
         RD.Success pollList ->
             viewPolls <|
