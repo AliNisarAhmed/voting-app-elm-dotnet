@@ -1,5 +1,6 @@
 {
-  "editor.formatOnSave": true,
-  "editor.codeLens": false,
-  "workbench.colorTheme": "Summer Night High Contrast"
+	"editor.formatOnSave": true,
+	"editor.codeLens": false,
+	"workbench.colorTheme": "Summer Night High Contrast",
+	"editor.insertSpaces": true
 }

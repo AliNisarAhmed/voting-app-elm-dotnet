@@ -133,7 +133,7 @@ update msg model =
 ---- VIEWS ----
 
 
-view : Model -> Html Msg
+view : Model -> Element Msg
 view model =
     let
         content =
@@ -150,14 +150,13 @@ view model =
                 RD.Success pollDetails ->
                     viewPollDetails pollDetails model.selectedOption model.canVote
     in
-    E.layout [] <|
-        E.column []
-            [ E.row [] [ E.text "Poll Details Page" ]
-            , content
-            , voteButton model.canVote
-            , cancelButton model.canVote
-            , E.html <| Toasty.view toastyConfig renderToast ToastyMsg model.toasties
-            ]
+    E.column []
+        [ E.row [] [ E.text "Poll Details Page" ]
+        , content
+        , voteButton model.canVote
+        , cancelButton model.canVote
+        , E.html <| Toasty.view toastyConfig renderToast ToastyMsg model.toasties
+        ]
 
 
 renderToast : String -> Html Msg

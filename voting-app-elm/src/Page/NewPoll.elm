@@ -128,37 +128,36 @@ update msg model =
 ---- VIEWS ----
 
 
-view : Model -> Html Msg
+view : Model -> Element Msg
 view model =
-    E.layout [] <|
-        E.column []
-            [ E.row [] [ E.text "Create a new poll" ]
-            , E.row []
-                [ Input.text []
-                    { onChange = UpdatePollDescription
-                    , text = model.description
-                    , placeholder = Just <| Input.placeholder [] <| E.text "Poll description"
-                    , label = Input.labelAbove [] <| E.text "Description"
-                    }
-                ]
-            , E.column [] <| viewOptions model.pollOptions
-            , E.row []
-                [ Input.text
-                    [ onEnter AddCurrentOption
-                    ]
-                    { onChange = UpdateCurrentOption
-                    , text = model.currentOption
-                    , placeholder = Just <| Input.placeholder [] <| E.text "Add an option"
-                    , label = Input.labelBelow [] <| E.text "Add an option"
-                    }
-                ]
-            , E.row []
-                [ Input.button []
-                    { onPress = Just SubmitPoll
-                    , label = E.text "Submit"
-                    }
-                ]
+    E.column []
+        [ E.row [] [ E.text "Create a new poll" ]
+        , E.row []
+            [ Input.text []
+                { onChange = UpdatePollDescription
+                , text = model.description
+                , placeholder = Just <| Input.placeholder [] <| E.text "Poll description"
+                , label = Input.labelAbove [] <| E.text "Description"
+                }
             ]
+        , E.column [] <| viewOptions model.pollOptions
+        , E.row []
+            [ Input.text
+                [ onEnter AddCurrentOption
+                ]
+                { onChange = UpdateCurrentOption
+                , text = model.currentOption
+                , placeholder = Just <| Input.placeholder [] <| E.text "Add an option"
+                , label = Input.labelBelow [] <| E.text "Add an option"
+                }
+            ]
+        , E.row []
+            [ Input.button []
+                { onPress = Just SubmitPoll
+                , label = E.text "Submit"
+                }
+            ]
+        ]
 
 
 viewOptions : List PollOption -> List (Element Msg)
