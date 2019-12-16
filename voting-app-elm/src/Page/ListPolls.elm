@@ -2,6 +2,7 @@ module Page.ListPolls exposing (..)
 
 import Browser exposing (..)
 import Browser.Navigation as Nav
+import Color
 import Decoders.Json exposing (..)
 import Element as E exposing (Element)
 import Element.Background as Background
@@ -115,7 +116,13 @@ viewPollsOrError model =
 
 viewPolls : List PollWithVoteCount -> Element Msg
 viewPolls polls =
-    E.column [ E.width (E.px 1200), E.height E.fill, E.height E.fill, E.centerX ] <|
+    E.column
+        [ E.width E.fill
+        , E.height E.fill
+        , E.centerX
+        , E.paddingXY 40 0
+        ]
+    <|
         [ E.wrappedRow [] <|
             List.map viewPoll polls
         ]
@@ -123,7 +130,10 @@ viewPolls polls =
 
 viewPoll : PollWithVoteCount -> Element Msg
 viewPoll poll =
-    E.link []
+    E.link
+        [ E.spacingXY 10 0
+        , E.width E.fill
+        ]
         { url = "/poll/" ++ String.fromInt poll.id
         , label =
             E.row
@@ -132,6 +142,7 @@ viewPoll poll =
                 , Border.solid
                 , Border.width 1
                 , Border.rounded 10
+                , E.spacingXY 10 0
                 ]
             <|
                 [ E.column [ E.paddingXY 50 50 ]

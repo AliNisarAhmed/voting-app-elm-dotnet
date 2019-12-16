@@ -2,7 +2,9 @@ module Main exposing (..)
 
 import Browser exposing (..)
 import Browser.Navigation as Nav
+import Color exposing (..)
 import Element as E exposing (Element)
+import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
@@ -31,7 +33,7 @@ type Msg
     | PollDetailsPageMsg PollDetails.Msg
     | LinkClicked UrlRequest
     | UrlChanged Url
-    | SearchPolls String
+    | Search String
 
 
 
@@ -165,8 +167,14 @@ update msg model =
             )
                 |> initCurrentPage
 
-        ( SearchPolls term, ListPollsPage pageModel ) ->
-            ( { model | searchTerm = term }, Cmd.none )
+        ( Search term, ListPollsPage pageModel ) ->
+            let
+                ( updatedPageModel, updatedCmd ) =
+                    ListPolls.update (ListPolls.SearchPolls term) pageModel
+            in
+            ( { model | page = ListPollsPage updatedPageModel, searchTerm = term }
+            , Cmd.map ListPollsPageMsg updatedCmd
+            )
 
         ( _, _ ) ->
             ( model, Cmd.none )
@@ -180,10 +188,10 @@ view : Model -> Document Msg
 view model =
     { title = "Vote App"
     , body =
-        [ E.layout [] <|
-            E.column [ E.width E.fill, E.spacingXY 40 0, E.explain Debug.todo ]
+        [ E.layout [ E.height E.fill ] <|
+            E.column [ E.width E.fill, E.height E.fill ]
                 [ navbar model
-                , currentView model
+                , E.row [ E.height E.fill, E.paddingXY 0 50 ] [ currentView model ]
                 ]
         ]
     }
@@ -208,7 +216,22 @@ currentView model =
 
 navbar : Model -> Element Msg
 navbar model =
-    E.row [ E.width E.fill, E.height E.fill, E.alignTop, E.spacingXY 20 0 ]
+    E.row
+        [ E.width E.fill
+        , E.height E.fill
+        , E.alignTop
+        , E.spacingXY 20 0
+        , Border.color Color.darkGreen
+        , Border.width 2
+        , Background.color Color.green
+        , E.spacingXY 10 0
+        , Border.shadow
+            { offset = ( 0, 0.2 )
+            , size = 0.5
+            , blur = 5
+            , color = Color.darkCharcoal
+            }
+        ]
         [ E.el [ E.alignLeft ] <|
             E.link []
                 { url = "/"
@@ -235,7 +258,7 @@ searchBar model =
         bar =
             E.el [ E.width (E.px 300), E.centerX ] <|
                 Input.text []
-                    { onChange = SearchPolls
+                    { onChange = Search
                     , placeholder = Just <| Input.placeholder [] <| E.text "Search..."
                     , text = model.searchTerm
                     , label = Input.labelHidden "Search"

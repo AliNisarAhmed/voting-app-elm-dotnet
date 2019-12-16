@@ -54,6 +54,7 @@
     <Compile Include="ServiceModels\PollServiceModel.cs" />
     <Compile Include="ServiceModels\UserServiceModel.cs" />
     <Compile Include="ServiceModels\VoteServiceModel.cs" />
+    <Compile Include="TestServiceRequest.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

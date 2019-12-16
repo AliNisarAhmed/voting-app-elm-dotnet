@@ -1,5 +1,7 @@
 ﻿using Funq;
 using ServiceStack;
+using ServiceStack.Auth;
+using ServiceStack.Caching;
 using ServiceStack.Data;
 using ServiceStack.OrmLite;
 using VotingAPI.ServiceInterface;
@@ -25,7 +27,23 @@ namespace VotingAPI
             //this.Plugins.Add(new PostmanFeature());
             //this.Plugins.Add(new CorsFeature());
 
-            this.Plugins.Add(new CorsFeature());
+            Plugins.Add(new CorsFeature());
+
+            Plugins.Add(new SessionFeature());
+
+            Plugins.Add(new RegistrationFeature());
+
+            Plugins.Add(new AuthFeature(() => new AuthUserSession(),
+                new IAuthProvider[]
+                {
+                    new BasicAuthProvider()
+                }));
+
+            var userRepo = new InMemoryAuthRepository();
+
+            container.Register<IAuthRepository>(userRepo);
+
+            container.Register<ICacheClient>(new MemoryCacheClient());
 
             container.Register<IDbConnectionFactory>(c => new OrmLiteConnectionFactory(
                 "Data Source=.; Initial Catalog=VotingApp; Integrated Security=True", SqlServerDialect.Provider
